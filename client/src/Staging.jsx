@@ -130,7 +130,7 @@ export default function Staging() {
                             <p className="text-sm tracking-[0.3em] mb-6 text-gray-700 font-light">BEFORE & AFTER</p>
                             <h1 className="text-4xl md:text-5xl font-serif mb-6">Staging Before & After</h1>
                             <p className="text-base text-gray-700 leading-relaxed">
-                                A curated selection of staging transformations showcasing how professional styling and design elevate spaces — before and after.
+                                Our Concierge enables us to transform properties in preparation for listing - the magic behind achieving the highest prices for our sellers.
                             </p>
                         </div>
                     </div>
