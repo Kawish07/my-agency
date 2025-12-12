@@ -21,7 +21,8 @@ export default function Header({ onBack, light = false }) {
     const isAllListings = location && location.pathname === '/all-listings';
     const useWhite = isAllListings;
     const rightLinkClass = useWhite ? 'text-white font-semibold text-base md:text-lg hover:opacity-80 transition-opacity' : 'text-black font-semibold text-base md:text-lg hover:opacity-70 transition-opacity';
-    const rightIconClass = useWhite ? 'w-5 h-5 text-white' : 'w-5 h-5 text-black';
+    // icon: white on small screens only, black on sm+ (medium and large)
+    const rightIconClass = 'w-5 h-5 text-white sm:text-black';
     const timeoutRef = useRef(null);
     const [contactOpen, setContactOpen] = useState(false);
 
@@ -171,16 +172,33 @@ export default function Header({ onBack, light = false }) {
                             </button>
                         ) : null}
 
+                        {/* Menu icon for small/medium screens (hidden on large) */}
                         <button
                             onClick={() => setMenuOpen(!menuOpen)}
-                            className={`flex items-center space-x-2 tracking-wide ${rightLinkClass}`}
+                            className={`flex items-center tracking-wide ${rightLinkClass} lg:hidden ml-2`}
+                            aria-label="Open menu"
                         >
                             <Menu className={rightIconClass} />
-                            <span className='font-semibold'>Menu</span>
                         </button>
-                        <div className="flex items-center space-x-8" style={{ marginLeft: '400px' }}>
+
+                        {/* Links visible on large screens only; placed before the large Menu button */}
+                        <div className="hidden lg:flex items-center space-x-8 z-50">
                             <button onClick={() => handleNav({ href: '/all-listings' })} className={`tracking-wide ${rightLinkClass}`}>Portfolio</button>
                             <button onClick={() => setContactOpen(true)} className={`tracking-wide ${rightLinkClass}`}>Contact</button>
+                        </div>
+
+                        {/* Menu button for large screens (hidden on small/medium).
+                            Absolutely position it at 50% so it aligns with the split background edge (where white begins). */}
+                        <div className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2 lg:translate-x-4 z-50">
+                            <button
+                                onClick={() => setMenuOpen(!menuOpen)}
+                                className={`inline-flex items-center space-x-2 tracking-wide ${rightLinkClass}`}
+                                aria-label="Open menu"
+                                style={{ backdropFilter: 'none' }}
+                            >
+                                <Menu className={rightIconClass} />
+                                <span className="font-semibold">Menu</span>
+                            </button>
                         </div>
                     </div>
                 </div>
