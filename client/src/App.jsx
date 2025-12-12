@@ -259,10 +259,10 @@ export default function App() {
                             className="hero-image w-full h-full object-cover transform -translate-y-6 md:-translate-y-10 scale-105"
                         />
                         <div className="absolute bottom-8 left-8 flex space-x-3">
-                            <a href="https://www.instagram.com/philipparnanzone/" className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md">
+                            <a href="https://www.instagram.com/theagency.ottawa/?hl=en" className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md">
                                 <Instagram className="w-5 h-5 text-black" />
                             </a>
-                            <a href="https://www.facebook.com/philipparnanzone/" className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md">
+                            <a href="https://www.facebook.com/parnanzonerealty/" className="w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md">
                                 <Facebook className="w-5 h-5 text-black" />
                             </a>
                         </div>
