@@ -48,6 +48,8 @@ export default function ContactModal({ open = false, onClose = () => { } }) {
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+    const FORMSPREE_URL = 'https://formspree.io/f/xjgvjjzy';
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
@@ -57,24 +59,53 @@ export default function ContactModal({ open = false, onClose = () => { } }) {
         }
         setLoading(true);
         try {
-            // send as a contact record so it stores in `contacts`
+            // construct payload for both Formspree and backend
             const payload = {
                 name: form.name,
                 email: form.email,
                 phone: form.phone,
-                // include preferred time inside message for reference
+                bestTime: form.bestTime,
                 message: form.message || (form.bestTime ? `Preferred time: ${form.bestTime}` : '')
             };
 
-            const res = await fetch(`${API}/api/contact`, {
+            // submit to Formspree (sends email)
+            const fsReq = fetch(FORMSPREE_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
-            if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || 'Server error');
+
+            // also submit to backend to persist contact (best-effort)
+            const backendReq = fetch(`${API}/api/contact`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: payload.name,
+                    email: payload.email,
+                    phone: payload.phone,
+                    message: payload.message,
+                }),
+            });
+
+            // wait for both requests but treat them independently
+            const results = await Promise.allSettled([fsReq, backendReq]);
+
+            const fsResult = results[0];
+            const backendResult = results[1];
+
+            const fsOk = fsResult.status === 'fulfilled' && fsResult.value && fsResult.value.ok;
+            const backendOk = backendResult.status === 'fulfilled' && backendResult.value && backendResult.value.ok;
+
+            if (!fsOk && !backendOk) {
+                // both failed
+                let msg = 'Failed to send message. Please try again.';
+                // try to extract an error body from fulfilled responses
+                if (fsResult.status === 'fulfilled' && fsResult.value && !fsResult.value.ok) {
+                    try { msg = await fsResult.value.text(); } catch (e) { /* ignore */ }
+                }
+                throw new Error(msg);
             }
+
             setSuccess(true);
             setForm({ name: '', email: '', phone: '', bestTime: '', message: '' });
             // auto-close after a short delay

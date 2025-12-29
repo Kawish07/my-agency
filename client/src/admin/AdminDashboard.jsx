@@ -12,11 +12,17 @@ const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const Sidebar = ({ stats, admin }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+  const { logout } = useAuth();
+
   const menuItems = [
     { path: '/admin', icon: 'dashboard', label: 'Dashboard' },
     { path: '/admin/new', icon: 'add', label: 'Add Property' },
   ];
+
+  const handleLogout = () => {
+    logout();
+    navigate('/admin/login');
+  };
 
   return (
     <div className="w-64 bg-gradient-to-b from-gray-900 to-black text-white min-h-screen shadow-2xl">
@@ -85,9 +91,9 @@ const Sidebar = ({ stats, admin }) => {
         </ul>
       </nav>
 
-      {/* Profile */}
+      {/* Profile & Logout */}
       <div className="p-6 border-t border-gray-800 mt-4">
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 mb-4">
           <div className="w-10 h-10 bg-gradient-to-r from-gray-700 to-gray-900 rounded-full flex items-center justify-center">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -98,6 +104,12 @@ const Sidebar = ({ stats, admin }) => {
             <p className="text-xs text-gray-400">{admin && admin.email ? admin.email : 'Administrator'}</p>
           </div>
         </div>
+        <button
+          onClick={handleLogout}
+          className="w-full mt-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-all duration-200"
+        >
+          Logout
+        </button>
       </div>
     </div>
   );

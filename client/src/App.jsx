@@ -178,22 +178,44 @@ export default function App() {
     if (!formData.name || !formData.email)
       return alert("Please provide name and email");
     try {
-      const res = await fetch(`${API}/api/popup`, {
+      const FORMSPREE_POPUP = 'https://formspree.io/f/xgoerdvr';
+
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        consent: !!formData.consent,
+        message: formData.message || "",
+        source: "homepage-popup",
+      };
+
+      const fsReq = fetch(FORMSPREE_POPUP, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const backendReq = fetch(`${API}/api/popup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          consent: !!formData.consent,
-          message: formData.message || "",
-          source: "homepage-popup",
-        }),
+        body: JSON.stringify(payload),
       });
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || "Server error");
+
+      const results = await Promise.allSettled([fsReq, backendReq]);
+      const fsResult = results[0];
+      const backendResult = results[1];
+
+      const fsOk = fsResult.status === 'fulfilled' && fsResult.value && fsResult.value.ok;
+      const backendOk = backendResult.status === 'fulfilled' && backendResult.value && backendResult.value.ok;
+
+      if (!fsOk && !backendOk) {
+        let msg = 'Failed to submit. Please try again later.';
+        if (fsResult.status === 'fulfilled' && fsResult.value && !fsResult.value.ok) {
+          try { msg = await fsResult.value.text(); } catch (e) { /* ignore */ }
+        }
+        throw new Error(msg);
       }
+
       setPopupSubmitted(true);
       setFormData({
         name: "",
@@ -217,6 +239,7 @@ export default function App() {
 
   const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
   const [featuredListing, setFeaturedListing] = useState(null);
+  const FORMSPREE_LETS = 'https://formspree.io/f/xykylogp';
 
   // Fetch latest listing for featured section
   useEffect(() => {
@@ -257,22 +280,44 @@ export default function App() {
     }
     setLeftLoading(true);
     try {
-      const res = await fetch(`${API}/api/letsconnect`, {
+      // Prepare payload
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        bestTime: formData.bestTime,
+        timezone: "ET",
+        interest: formData.interest,
+      };
+
+      // Submit to Formspree (email) and backend (persist) in parallel
+      const fsReq = fetch(FORMSPREE_LETS, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const backendReq = fetch(`${API}/api/letsconnect`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          bestTime: formData.bestTime,
-          timezone: "ET",
-          interest: formData.interest,
-        }),
+        body: JSON.stringify(payload),
       });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Server error");
+
+      const results = await Promise.allSettled([fsReq, backendReq]);
+      const fsResult = results[0];
+      const backendResult = results[1];
+
+      const fsOk = fsResult.status === 'fulfilled' && fsResult.value && fsResult.value.ok;
+      const backendOk = backendResult.status === 'fulfilled' && backendResult.value && backendResult.value.ok;
+
+      if (!fsOk && !backendOk) {
+        let msg = 'Failed to submit. Please try again.';
+        if (fsResult.status === 'fulfilled' && fsResult.value && !fsResult.value.ok) {
+          try { msg = await fsResult.value.text(); } catch (e) { /* ignore */ }
+        }
+        throw new Error(msg);
       }
+
       setLeftSubmitted(true);
       setFormData({
         name: "",
