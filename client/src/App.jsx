@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { X, Instagram, Facebook } from "lucide-react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import { getLenis } from "./lib/lenis";
+import { getLenis, subscribeToScroll } from "./lib/lenis";
 import PageLoader from "./components/PageLoader";
 import TransitionSplash from "./components/TransitionSplash";
 import FloatingCTA from "./components/FloatingCTA";
@@ -40,9 +40,7 @@ export default function App() {
   useEffect(() => {
     lastScrollY.current = typeof window !== "undefined" ? window.scrollY : 0;
 
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
+    const handleScroll = (currentScrollY) => {
       // Show popup after scrolling past hero section
       if (!hasShownPopup.current && currentScrollY > 600) {
         setShowPopup(true);
@@ -64,8 +62,10 @@ export default function App() {
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const unsubscribe = subscribeToScroll(handleScroll);
+    return () => {
+      try { unsubscribe && unsubscribe(); } catch (e) { /* noop */ }
+    };
   }, []);
 
   // Handle scroll to anchor from navigation state

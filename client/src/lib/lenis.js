@@ -26,6 +26,30 @@ export function getLenis() {
   return lenisInstance
 }
 
+// Subscribe to scroll updates. Returns an unsubscribe function.
+export function subscribeToScroll(handler) {
+  // handler receives a single numeric argument: scrollY
+  const lenis = getLenis()
+  if (lenis && typeof lenis.on === 'function') {
+    const cb = (e) => {
+      try {
+        handler(typeof e === 'object' && e !== null && 'scroll' in e ? e.scroll : window.scrollY)
+      } catch (err) {
+        // noop
+      }
+    }
+    lenis.on('scroll', cb)
+    return () => {
+      try { lenis.off('scroll', cb) } catch (e) { /* noop */ }
+    }
+  }
+
+  // Fallback to native scroll
+  const wrapped = () => handler(window.scrollY)
+  window.addEventListener('scroll', wrapped, { passive: true })
+  return () => window.removeEventListener('scroll', wrapped)
+}
+
 export function scrollToTop(options = {}) {
   const lenis = getLenis()
   if (lenis) {

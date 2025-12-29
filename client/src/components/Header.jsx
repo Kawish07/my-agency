@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Menu, X, Instagram, Facebook } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { getLenis } from '../lib/lenis';
+import { getLenis, subscribeToScroll } from '../lib/lenis';
 import ContactModal from './ContactModal';
 
 export default function Header({ onBack, light = false }) {
@@ -56,30 +56,29 @@ export default function Header({ onBack, light = false }) {
     useEffect(() => {
         lastScrollY.current = typeof window !== 'undefined' ? window.scrollY : 0;
 
-        const handleScroll = () => {
-            const currentScrollY = window.scrollY;
-            // track whether we're at the top of the page (used to hide split background)
-            setAtTop(currentScrollY <= 10);
-            if (!ticking.current) {
-                window.requestAnimationFrame(() => {
-                    const delta = currentScrollY - lastScrollY.current;
-                    if (delta > 10) setShowHeader(false);
-                    else if (delta < -10) setShowHeader(true);
-                    lastScrollY.current = currentScrollY;
-                    ticking.current = false;
-                });
-                ticking.current = true;
-            }
-        };
+            const handleScroll = (currentScrollY) => {
+                // track whether we're at the top of the page (used to hide split background)
+                setAtTop(currentScrollY <= 10);
+                if (!ticking.current) {
+                    window.requestAnimationFrame(() => {
+                        const delta = currentScrollY - lastScrollY.current;
+                        if (delta > 10) setShowHeader(false);
+                        else if (delta < -10) setShowHeader(true);
+                        lastScrollY.current = currentScrollY;
+                        ticking.current = false;
+                    });
+                    ticking.current = true;
+                }
+            };
 
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        // listen for global open contact modal events
-        const onOpenContact = () => setContactOpen(true);
-        window.addEventListener('openContactModal', onOpenContact);
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-            window.removeEventListener('openContactModal', onOpenContact);
-        };
+            const unsubscribe = subscribeToScroll(handleScroll);
+            // listen for global open contact modal events
+            const onOpenContact = () => setContactOpen(true);
+            window.addEventListener('openContactModal', onOpenContact);
+            return () => {
+                try { unsubscribe && unsubscribe(); } catch (e) { /* noop */ }
+                window.removeEventListener('openContactModal', onOpenContact);
+            };
     }, []);
 
     // helper: smooth-scroll to an anchor hash using Lenis when available
