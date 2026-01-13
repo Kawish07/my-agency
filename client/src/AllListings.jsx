@@ -6,6 +6,7 @@ import Footer from './components/Footer.jsx';
 import { getDummyListings } from './data/dummyListings';
 import { useEffect, useRef } from 'react';
 import { resolveImage, ensureProtocol, placeholderDataUrl } from './lib/image';
+import { formatPrice } from './lib/format';
 
 const API = import.meta.env.VITE_API_URL;
 export default function AllListings({ onBack }) {
@@ -187,7 +188,7 @@ export default function AllListings({ onBack }) {
                                         {listing.beds} Beds | {listing.baths} Baths | {listing.sqft} Sq.Ft.
                                     </p>
 
-                                    <p className="text-3xl font-serif text-gray-900 mb-6">${listing.price}</p>
+                                    <p className="text-3xl font-serif text-gray-900 mb-6">{formatPrice(listing.price)}</p>
 
                                     <button className="text-sm underline text-gray-900 hover:text-gray-600 transition-colors">
                                         More Details

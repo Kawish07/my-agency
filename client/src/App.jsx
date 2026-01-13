@@ -387,7 +387,6 @@ export default function App() {
               <h1 className="text-5xl md:text-6xl font-serif mb-3 text-black">
                 <span className="relative inline-block">
                   Philip
-                  <span className="absolute bottom-1 left-0 w-full h-3 bg-yellow-200 opacity-60 -z-10"></span>
                 </span>
                 Parnanzone
               </h1>
@@ -602,7 +601,7 @@ export default function App() {
               range of transactions, from single-family homes and urban condos
               to investment properties and relocations. Follow Philip for market
               insights, expert advice, and the latest real estate updates across
-              Ottawa and its surrounding communities!e Seattle & Eastside area!
+              Ottawa and its surrounding communities.
             </p>
             <div className="flex space-x-4">
               <a
