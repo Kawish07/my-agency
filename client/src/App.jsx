@@ -889,10 +889,7 @@ export default function App() {
                 ? "scale-100 opacity-100 translate-y-0"
                 : "scale-90 opacity-0 translate-y-8"
             } ${popupSubmitted ? "bg-white" : ""}`}
-            style={{
-              backgroundColor: popupSubmitted ? "#ffffff" : "#141414",
-              maxHeight: "600px",
-            }}
+            style={{ backgroundColor: popupSubmitted ? "#ffffff" : "#141414" }}
           >
             <button
               onClick={() => setShowPopup(false)}
@@ -901,9 +898,9 @@ export default function App() {
               <X className="w-5 h-5 text-black" />
             </button>
 
-            <div className="grid md:grid-cols-5" style={{ height: "600px" }}>
+            <div className="grid grid-cols-1 md:grid-cols-5" >
               {/* Left Side - Image */}
-              <div className="relative h-64 md:h-auto overflow-hidden md:col-span-2">
+              <div className="relative h-44 md:h-auto overflow-hidden md:col-span-2">
                 <img
                   src={
                     popupSubmitted
@@ -924,12 +921,11 @@ export default function App() {
 
               {/* Right Side - Scrollable Content */}
               <div
-                className={`p-8 md:p-10 flex flex-col transition-all duration-700 md:col-span-3 overflow-hidden bg-white`}
-                style={{ maxHeight: "600px" }}
+                className={`p-6 md:p-10 flex flex-col transition-all duration-700 md:col-span-3 bg-white max-h-[80vh] md:max-h-[650px] overflow-y-auto no-scrollbar`}
               >
                 {!popupSubmitted ? (
                   <div className="animate-slideInRight">
-                    <h2 className="text-1xl md:text-2xl font-light mb-0 text-black tracking-wide">
+                    <h2 className="text-1xl md:text-2xl font-light mb-0 mt-1 md:mt-6 text-black tracking-wide">
                       NOT READY TO START YOUR SEARCH YET?
                     </h2>
                     <p className="text-gray-700 mb-8 text-base leading-relaxed">
@@ -1012,7 +1008,7 @@ export default function App() {
 
                       <button
                         type="submit"
-                        className="w-full py-4 bg-black text-white font-semibold tracking-widest hover:bg-gray-800 transition-all duration-300 transform hover:scale-105 shadow-lg text-sm"
+                        className="w-full py-4 bg-black text-white font-semibold tracking-widest hover:bg-gray-800 transition-all duration-300 transform hover:scale-105 shadow-lg text-sm mb-8 md:mb-8"
                       >
                         SUBSCRIBE NOW
                       </button>

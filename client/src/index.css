@@ -23,6 +23,15 @@ a, button, input, textarea, select, label, [role="button"], input[type="range"] 
 	cursor: pointer;
 }
 
+/* Utility to visually hide scrollbars while preserving scroll behavior */
+.no-scrollbar {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+	display: none; /* Safari and Chrome */
+}
+
 /* Keep resize cursor for before/after draggable slider */
 .cursor-ew-resize, .ew-resize, .cursor-ew-resize * { cursor: ew-resize !important; }
 

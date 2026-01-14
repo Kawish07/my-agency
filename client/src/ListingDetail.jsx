@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom'; // <--- ADDED THIS
 import { useParams, Link } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ContactModal from './components/ContactModal';
 import { Instagram, Facebook } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { getDummyListing } from './data/dummyListings';
 import { resolveImage, ensureProtocol, placeholderDataUrl } from './lib/image';
 import { formatPrice } from './lib/format';
@@ -76,6 +76,7 @@ export default function ListingDetail() {
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
   if (!listing) return <div className="min-h-screen flex items-center justify-center">Listing not found.</div>;
+
   return (
     <div className="min-h-screen bg-white">
       <Header light={true} />
@@ -265,53 +266,82 @@ export default function ListingDetail() {
 
       <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
 
-      {/* Image preview modal/slider */}
-      {previewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={closePreview}>
+      {/* Image preview modal/slider - PORTALED to body to fix Z-Index */}
+      {previewOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90" onClick={closePreview} style={{ backdropFilter: 'blur(5px)' }}>
           <div className="relative max-w-[90vw] max-h-[90vh] w-full">
+            
+            {/* Close Button */}
             <button
-              className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2 z-20"
+              className="absolute top-4 right-4 text-white bg-black/50 hover:bg-white hover:text-black rounded-full p-3 z-20 transition-colors"
               onClick={(e) => { e.stopPropagation(); closePreview(); }}
               aria-label="Close preview"
             >
-              ✕
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
 
+            {/* Previous Button */}
             <button
-              className="absolute left-2 top-1/2 -translate-y-1/2 text-white bg-black/30 rounded-full p-3 z-20"
+              className="absolute left-2 top-1/2 -translate-y-1/2 text-white bg-black/50 hover:bg-white hover:text-black rounded-full p-3 z-20 transition-colors"
               onClick={(e) => { e.stopPropagation(); showPrev(e); }}
               aria-label="Previous"
             >
-              ‹
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
             </button>
 
+            {/* Next Button */}
             <button
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-black/30 rounded-full p-3 z-20"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-white bg-black/50 hover:bg-white hover:text-black rounded-full p-3 z-20 transition-colors"
               onClick={(e) => { e.stopPropagation(); showNext(e); }}
               aria-label="Next"
             >
-              ›
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </button>
 
-            <div className="w-full h-full flex items-center justify-center">
-              <img
-                src={((listing.images && listing.images.length) ? listing.images : (listing.image ? [listing.image] : []))[previewIndex]}
-                alt={`preview-${previewIndex}`}
-                className="max-w-full max-h-[80vh] object-contain mx-auto"
-                onClick={(e) => e.stopPropagation()}
-              />
+            {/* Main Image */}
+                        {/* Main Image */}
+            <div className="w-full h-full flex items-center justify-center bg-white">
+              {/* We calculate the full URL here to ensure it points to the backend */}
+              {(() => {
+                  const imgArray = (listing.images && listing.images.length) ? listing.images : (listing.image ? [listing.image] : []);
+                  const currentImg = imgArray[previewIndex];
+                  
+                  // If image starts with /, it's a backend path, so prepend API URL
+                  const fullImgUrl = currentImg?.startsWith('/') 
+                                    ? `${API}${currentImg}` 
+                                    : ensureProtocol(resolveImage(currentImg));
+
+                  return (
+                      <img
+                        src={fullImgUrl}
+                        alt={`preview-${previewIndex}`}
+                        className="max-w-full max-h-[85vh] object-contain mx-auto drop-shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                        onError={(e) => {
+                            console.error("Modal Image Load Error. Trying to load:", fullImgUrl);
+                            e.currentTarget.onerror = null; 
+                            e.currentTarget.src = placeholderDataUrl(); 
+                        }}
+                      />
+                  )
+              })()}
             </div>
 
-            {/* thumbnails */}
-            <div className="mt-4 flex gap-2 overflow-x-auto px-2">
+            {/* Thumbnails */}
+            <div className="mt-4 flex gap-2 overflow-x-auto px-2 pb-2 justify-center">
               {((listing.images && listing.images.length) ? listing.images : (listing.image ? [listing.image] : [])).map((src, i) => (
-                <button key={i} onClick={(e) => { e.stopPropagation(); setPreviewIndex(i); }} className={`rounded overflow-hidden border ${i === previewIndex ? 'ring-2 ring-white' : 'ring-0'}`}>
-                  <img src={src} alt={`thumb-${i}`} className="w-24 h-16 object-cover" />
+                <button 
+                  key={i} 
+                  onClick={(e) => { e.stopPropagation(); setPreviewIndex(i); }} 
+                  className={`rounded overflow-hidden border-2 transition-all ${i === previewIndex ? 'border-white scale-105' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                >
+                  <img src={src} alt={`thumb-${i}`} className="w-20 h-14 object-cover" />
                 </button>
               ))}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <Footer />
